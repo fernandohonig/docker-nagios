@@ -47,6 +47,31 @@
   make all
   make install-plugin
   
+    #Install livestatus
+  cd /tmp; wget 'http://www.mathias-kettner.de/download/mk-livestatus-1.2.0p3.tar.gz'
+  tar xfz mk-livestatus-1.2.0p3.tar.gz
+  cd mk-livestatus-*/
+  ./configure
+  make
+  make install
+  echo 'service livestatus' >> /etc/xinetd.d/livestatus
+  echo '{' >> /etc/xinetd.d/livestatus
+  echo 'type            = UNLISTED' >> /etc/xinetd.d/livestatus
+  echo 'port            = 6557' >> /etc/xinetd.d/livestatus
+  echo 'socket_type     = stream' >> /etc/xinetd.d/livestatus
+  echo 'protocol        = tcp' >> /etc/xinetd.d/livestatus
+  echo 'wait            = no' >> /etc/xinetd.d/livestatus
+  echo 'cps             = 100 3' >> /etc/xinetd.d/livestatus
+  echo 'instances       = 500' >> /etc/xinetd.d/livestatus
+  echo 'per_source      = 250' >> /etc/xinetd.d/livestatus
+  echo 'flags           = NODELAY' >> /etc/xinetd.d/livestatus
+  echo 'user            = nagios' >> /etc/xinetd.d/livestatus
+  echo 'server          = /usr/local/bin/unixcat' >> /etc/xinetd.d/livestatus
+  echo 'server_args     = /usr/local/nagios/var/rw/live' >> /etc/xinetd.d/livestatus
+  echo 'disable         = no' >> /etc/xinetd.d/livestatus
+  echo '}' >> /etc/xinetd.d/livestatus
+  service xinetd restart
+  
   #to fix error relate to ip address of container apache2
   echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/fqdn.conf
   ln -s /etc/apache2/conf-available/fqdn.conf /etc/apache2/conf-enabled/fqdn.conf
